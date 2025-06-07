@@ -1,0 +1,45 @@
+name: Build Windows Executable
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            base-devel
+            mingw-w64-x86_64-toolchain
+            autoconf
+            automake
+            libtool
+
+      - name: Configure and build
+        shell: msys2 {0}
+        run: |
+          cd mecab
+          ./autogen.sh
+          ./configure --with-charset=utf8
+          make
+          make check
+
+      - name: Package executable
+        run: |
+          cd mecab/src
+          7z a mecab-windows.zip mecab.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mecab-windows
+          path: mecab/src/mecab-windows.zip
