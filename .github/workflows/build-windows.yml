@@ -30,7 +30,7 @@ jobs:
         run: |
           cd mecab
           ./autogen.sh
-          ./configure --with-charset=utf8
+          ./configure LDFLAGS="-L/mingw64/lib -liconv" --with-charset=utf8
           make
           make check
 
